@@ -2,22 +2,42 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
 #include "process_arg.h"
 
 int main(int argc, char** argv)
 {
-    pid_t ppid = getpid();
-    fprintf(stdout, "PPID: %d\n", ppid);
-
     if(argc == 1)
     {
         fprintf(stderr, "Error: no arguments given.\n");
         return -1;
     }
 
-    for(int i = 1; i < argc; i++)
+    pid_t ppid = getpid();
+    fprintf(stdout, "PPID: %d\n", ppid);
+
+    int n = argc - 1;               
+    int split = n / 2;              
+    pid_t pid = fork();
+
+    if(pid == -1)
     {
-        process_arg(argv[i], ppid);
+        perror("fork");
+        return -1;
+    }
+
+    if(pid == 0)  
+    {
+        for(int i = split; i < n; i++)
+            process_arg(argv[i + 1]);
+        exit(0);
+    }
+    else          
+    {
+        for(int i = 0; i < split; i++)
+            process_arg(argv[i + 1]);
+        wait(NULL);
     }
 
     return 0;

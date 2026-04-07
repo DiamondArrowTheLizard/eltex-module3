@@ -3,6 +3,6 @@
 
 #include <sys/types.h>
 
-void process_arg(char* arg, pid_t ppid);
+void process_arg(char* arg);
 
 #endif // !PROCESS_ARG_H

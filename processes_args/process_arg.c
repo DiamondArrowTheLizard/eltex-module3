@@ -6,29 +6,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <signal.h>
 
-void process_arg(char* arg, pid_t ppid)
+void process_arg(char* arg)
 {
     if(!isdigit(arg[0]))
     {
         fprintf(stdout, "String from PID %d [PPID: %d]: %s\n", getpid(), getppid(), arg);
-
-        if(getpid() != ppid)
-        {
-            fprintf(stdout, "Killing process %d\n", getpid());
-            kill(getpid(), SIGTERM);
-        }
         return;
     }
-
-    pid_t p = fork();
-    if(p < 0)
-    {
-        fprintf(stderr, "Error: process forking failed.\n");
-        return;
-    }
-    fprintf(stdout, "Forking child process %d from parent %d\n", getpid(), getppid());
 
     int is_float = 0;
     for(size_t i = 1; i < strlen(arg); i++)
@@ -42,12 +27,6 @@ void process_arg(char* arg, pid_t ppid)
         if(!isdigit(arg[i]))
         {
             fprintf(stdout, "String from PID %d [PPID: %d]: %s\n", getpid(), getppid(), arg);
-
-            if(getpid() != ppid)
-            {
-                fprintf(stdout, "Killing process %d\n", getpid());
-                kill(getpid(), SIGTERM);
-            }
             return;
         }
     }
@@ -65,11 +44,5 @@ void process_arg(char* arg, pid_t ppid)
     } else {
 
         fprintf(stdout, "String from PID %d [PPID: %d]: %s\n", getpid(), getppid(), arg);
-    }
-
-    if(getpid() != ppid)
-    {
-        fprintf(stdout, "Killing process %d\n", getpid());
-        kill(getpid(), SIGTERM);
     }
 }
