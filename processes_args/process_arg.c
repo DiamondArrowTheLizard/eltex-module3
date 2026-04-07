@@ -11,8 +11,11 @@ void process_arg(char* arg)
 {
     if(!isdigit(arg[0]))
     {
-        fprintf(stdout, "String from PID %d [PPID: %d]: %s\n", getpid(), getppid(), arg);
-        return;
+        if(arg[0] != '-') 
+        {
+            fprintf(stdout, "String from PID %d [PPID: %d]: %s\n", getpid(), getppid(), arg);
+            return;
+        }
     }
 
     int is_float = 0;
