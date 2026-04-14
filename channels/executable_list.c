@@ -182,7 +182,6 @@ void exec_list_exec(exec_list* list)
                 }
                 executable_exec(current->ex);
 
-                perror("execvp");
                 return;
                 break;
 

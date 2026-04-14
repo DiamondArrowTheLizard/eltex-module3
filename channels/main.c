@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <pwd.h>
 
 #define MAX_INPUT 1024
 
@@ -18,7 +19,17 @@ int main()
 
     while (1)
     {
-        fprintf(stdout, "%s@%s> ", getlogin(), hostname);
+        char* working_directory = NULL;
+        working_directory = getcwd(working_directory, MAX_INPUT);
+        struct passwd *pw = getpwuid(getuid());
+        if (pw != NULL) 
+        {
+            fprintf(stdout, "%s@%s %s> ", pw->pw_name, hostname, working_directory);
+
+        } else {
+            fprintf(stdout, "%d@%s %s> ", getuid(), hostname, working_directory);
+        }
+
         fflush(stdout);
 
         if (fgets(input, sizeof(input), stdin) == NULL)
