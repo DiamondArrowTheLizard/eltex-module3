@@ -31,7 +31,6 @@ void handle_sigint(int sig) {
 
 int main() {
     signal(SIGINT, handle_sigint);
-
     key_t key = ftok(CHAT_KEY, 65);
     int msqid = msgget(key, 0666 | IPC_CREAT);
     global_msqid = msqid;
@@ -40,24 +39,21 @@ int main() {
     int clients[MAX_CLIENTS];
     int client_count = 0;
 
-    printf("[SERVER] Started. MSQID: %d. Waiting for messages...\n", msqid);
+    printf("[SERVER] Started. Waiting for connections...\n");
 
     while (1) {
-        if (msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), SERVER_TYPE, 0) == -1) {
-            break;
-        }
+        if (msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), SERVER_TYPE, 0) == -1) break;
 
-        int exists = 0;
-        for (int i = 0; i < client_count; i++) {
-            if (clients[i] == msg.sender_id) {
-                exists = 1;
-                break;
+        if (strcmp(msg.mtext, "CONNECT") == 0) {
+            int exists = 0;
+            for (int i = 0; i < client_count; i++) {
+                if (clients[i] == msg.sender_id) exists = 1;
             }
-        }
-        
-        if (!exists && client_count < MAX_CLIENTS) {
-            clients[client_count++] = msg.sender_id;
-            log_event("connected to the chat", msg.sender_id, NULL);
+            if (!exists && client_count < MAX_CLIENTS) {
+                clients[client_count++] = msg.sender_id;
+                log_event("registered and online", msg.sender_id, NULL);
+            }
+            continue;
         }
 
         if (strcmp(msg.mtext, "shutdown") == 0) {
@@ -72,17 +68,13 @@ int main() {
         }
 
         log_event("sent message", msg.sender_id, msg.mtext);
-
         int sender = msg.sender_id;
         for (int i = 0; i < client_count; i++) {
             if (clients[i] != sender) {
                 msg.mtype = clients[i];
-                if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == 0) {
-                    printf("  -> Forwarded to client %d\n", (int)msg.mtype);
-                }
+                msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0);
             }
         }
     }
-
     return 0;
 }

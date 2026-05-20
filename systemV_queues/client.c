@@ -14,11 +14,15 @@ int main(int argc, char *argv[]) {
     int msqid = msgget(key, 0666);
     struct msg_buf msg;
 
-    pid_t pid = fork();
+    msg.mtype = SERVER_TYPE;
+    msg.sender_id = my_id;
+    strcpy(msg.mtext, "CONNECT");
+    msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0);
 
+    pid_t pid = fork();
     if (pid == 0) {
         while (1) {
-            msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), my_id, 0);
+            if (msgrcv(msqid, &msg, sizeof(msg) - sizeof(long), my_id, 0) == -1) break;
             printf("\nClient %d: %s\n> ", msg.sender_id, msg.mtext);
             fflush(stdout);
         }
@@ -38,6 +42,5 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-
     return 0;
 }

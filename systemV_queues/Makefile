@@ -9,6 +9,10 @@ SRC_FILES_CLIENT = $(SRC_DIR)/client.c
 
 TARGET = ../bin
 
+all:
+	$(CC) $(CFLAGS) $(SRC_FILES_SERVER) -o $(TARGET)/svq_server
+	$(CC) $(CFLAGS) -g $(SRC_FILES_CLIENT) -o $(TARGET)/svq_client
+
 server: 
 	$(CC) $(CFLAGS) $(SRC_FILES_SERVER) -o $(TARGET)/svq_server
 
